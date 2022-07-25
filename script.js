@@ -7,6 +7,7 @@ const websiteUrlEl = document.getElementById('website-url');
 const bookmarksContainer = document.getElementById('bookmarks-container');
 
 let bookmarks = {};
+let urls = new Set();
 
 //Show Modal, Focus on Input
 function showModal() {
@@ -40,13 +41,17 @@ function buildBookmarks() {
     //Remove all bookmarks elements
     bookmarksContainer.textContent = '';
     //Build items
-    // console.log(bookmarks);
     Object.keys(bookmarks).forEach((id) => {
         const { name, url } = bookmarks[id];
         //Item
-        // console.log(name, url);
         const item = document.createElement('div');
         item.classList.add('item');
+        item.setAttribute('onmouseover', `showFull(this)`);
+        item.setAttribute('onmouseout', 'showLess(this)');
+        item.setAttribute('onclick', `toggleTextClick(this)`);
+        //View icon 
+        const viewIcon = document.createElement('p');
+        viewIcon.textContent = "View";
         //close icon
         const closeIcon = document.createElement('i');
         closeIcon.classList.add('fa-solid', 'fa-xmark');
@@ -66,9 +71,27 @@ function buildBookmarks() {
         link.textContent = name;
         //Append to bookmark container
         linkInfo.append(favicon, link);
-        item.append(closeIcon, linkInfo);
+        item.append(viewIcon, closeIcon, linkInfo);
         bookmarksContainer.appendChild(item);
     });
+}
+
+//time counter
+let timeout = null;
+//showFull content
+function showFull(curr) {
+    timeout = setTimeout(() => { curr.querySelector('a').classList.add('show-full'); }, 3000);
+}
+
+//showLess content
+function showLess(curr) {
+    clearTimeout(timeout);
+    curr.querySelector('a').classList.remove('show-full');
+}
+
+//Toggle text 
+function toggleTextClick(curr) {
+    curr.querySelector('a').classList.toggle('show-full');
 }
 
 //Fetch bookmarks
@@ -78,26 +101,29 @@ function fetchBookmarks() {
         bookmarks = JSON.parse(localStorage.getItem('bookmarks'));
     } else {
         //Create bookmarks array in localStorage
-        const id = `https://github.com/milan10110`;
+        const id = idGenerator("https://github.com/milan10110");
         bookmarks[id] = {
             name: 'Milan\'s Github',
             url: 'https://github.com/milan10110',
         };
         localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
     }
-    // console.log(bookmarks);
+    populateUrls();
     buildBookmarks();
 }
 
 //Delete Bookmark
 function deleteBookmark(id) {
     if (bookmarks[id]) {
+        urls.delete(id.slice(0, id.length - 13));
         delete bookmarks[id];
         delete bookmarks.id;
     }
     //Update bookmarks array in localStorage, re-populate DOM
     localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
     fetchBookmarks();
+    populateUrls();
+    console.log(urls);
 }
 
 //Handle data from form
@@ -105,24 +131,38 @@ function storeBookmark(e) {
     e.preventDefault();
     const nameValue = websiteNameEl.value;
     let urlValue = websiteUrlEl.value;
-    if (!urlValue.includes('http://', 'https://')) {
+    if (!(urlValue.includes('http://') || urlValue.includes('https://'))) {
         urlValue = `https://${urlValue}`;
     }
-    // console.log(nameValue, urlValue);
     if (!validate(nameValue, urlValue)) {
         return false;
     };
+
+    if (urls.has(urlValue)) {
+        confirm("This url already exists, Still want to continue?");
+    }
 
     const bookmark = {
         name: nameValue,
         url: urlValue,
     }
-    bookmarks[urlValue] = bookmark;
-    // console.log(JSON.stringify(bookmarks));
+
+    bookmarks[idGenerator(urlValue)] = bookmark;
     localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
     fetchBookmarks();
     bookmarkForm.reset();
     websiteNameEl.focus();
+}
+
+function populateUrls() {
+    Object.keys(bookmarks).forEach((id) => {
+        urls.add(id.slice(0, id.length - 13));
+    });
+}
+
+//Unique id generator 
+function idGenerator(url) {
+    return url + Date.now();
 }
 
 //Event Listener
