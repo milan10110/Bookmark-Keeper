@@ -7,6 +7,10 @@
     --border-radius-hover: 5px;
 }
 
+* {
+    margin: 0;
+}
+
 html {
     box-sizing: border-box;
 }
@@ -48,6 +52,14 @@ h1:hover {
     justify-content: center;
 }
 
+p {
+    text-transform: uppercase;
+    user-select: none;
+    cursor: pointer;
+    display: inline-block;
+    font-size: .8em;
+}
+
 .item {
     background: rgba(0, 0, 0, 0.5);
     color: white;
@@ -71,6 +83,15 @@ a {
     font-size: 20px;
     font-weight: bold;
     text-transform: uppercase;
+    display: inline-block;
+    max-width: 15em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.show-full {
+    white-space: inherit;
 }
 
 a:link,
@@ -99,6 +120,7 @@ a:active {
 .name img {
     height: 20px;
     width: 20px;
+    margin-bottom: 6px;
     margin-right: 5px;
     vertical-align: sub;
     transition: box-shadow 0.1s 0.2s;
