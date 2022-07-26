@@ -29,6 +29,7 @@ h1 {
     border-radius: var(--border-radius);
     cursor: pointer;
     text-transform: uppercase;
+    text-align: center;
     width: 275px;
     margin: 20px auto 10px;
     user-select: none;
